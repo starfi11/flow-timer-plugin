@@ -1,0 +1,10 @@
+{
+  "ID": "flow_timer_plugin",
+  "Name": "Flow Timer",
+  "ActionKeyword": "timer",
+  "Author": "starfi11",
+  "Version": "0.1",
+  "Language": "python",
+  "Website": "https://github.com/your/repo",
+  "ExecuteFileName": "main.py"
+}
