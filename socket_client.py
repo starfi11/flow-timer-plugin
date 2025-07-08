@@ -31,7 +31,6 @@ def send_command(cmd: str):
         s.sendall(cmd.encode('utf-8'))
         s.close()
     except Exception:
-        # 尝试启动沙漏服务并重试
         exe_path = get_sandglass_path()
         launched = try_launch_exe(exe_path)
         if launched:
@@ -44,7 +43,6 @@ def send_command(cmd: str):
             except Exception:
                 pass
 
-        # 如果还失败，返回错误提示（Flow 会显示）
         print(json.dumps([{
             "Title": "发送失败：沙漏服务不可用",
             "SubTitle": f"尝试启动服务失败，请检查路径是否正确：{exe_path}"

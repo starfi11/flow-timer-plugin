@@ -1,51 +1,25 @@
 import sys
-import json
-from socket_client import send_command
-from utils import parse_input
+import os
+from pathlib import Path
 
-def main():
-    raw = sys.stdin.read()
-    query = json.loads(raw)
+# 添加 plugin 和 lib 路径到 sys.path
+plugin_dir = Path(__file__).parent.absolute()
+sys.path.insert(0, str(plugin_dir))
+sys.path.insert(0, str(plugin_dir / "lib"))
 
-    user_input = query.get("Parameters", "")
-    if not user_input:
-        # 空输入返回提示
-        print(json.dumps([{
-            "Title": "请输入: 计时器名称 + 时间，如 '泡茶 20m'",
-            "SubTitle": "示例: timer 泡茶 20m",
-            "IcoPath": "Images\\app.png"
-        }]))
-        return
+from flowlauncher import FlowLauncher
+from commands import handle_query
+from settings import __plugin_settings__
 
-    result = parse_input(user_input)
+class TimerPlugin(FlowLauncher):
+    def query(self, query):
+        return handle_query(query)
 
-    if result["cmd"] == "start":
-        label = result["label"]
-        time_str = result["time"]
-        command_str = f"start {label} {time_str}"
-        subtitle = f"开始计时：{label} - {time_str}"
-    elif result["cmd"] == "cancel":
-        command_str = f"cancel {result['label']}"
-        subtitle = f"取消计时器：{result['label']}"
-    elif result["cmd"] == "reset":
-        command_str = f"reset {result['label']}"
-        subtitle = f"重置计时器：{result['label']}"
-    else:
-        print(json.dumps([{
-            "Title": "命令格式错误",
-            "SubTitle": "支持: [计时器名 + 时间] / cancel / reset",
-        }]))
-        return
+    def context_menu(self, data):
+        return []
 
-    # 实际发送命令
-    send_command(command_str)
+    def setting(self):
+        return __plugin_settings__()
 
-    # 返回 Flow 候选项
-    print(json.dumps([{
-        "Title": command_str,
-        "SubTitle": subtitle,
-        "IcoPath": "Images\\app.png"
-    }]))
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    TimerPlugin()

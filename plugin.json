@@ -1,10 +1,12 @@
 {
   "ID": "flow_timer_plugin",
-  "Name": "Flow Timer",
-  "ActionKeyword": "timer",
+  "Name": "Timer",
+  "Description": "A lightweight command timer plugin",
   "Author": "starfi11",
-  "Version": "0.1",
+  "Version": "1.0.0",
   "Language": "python",
-  "Website": "https://github.com/your/repo",
-  "ExecuteFileName": "main.py"
+  "Website": "https://github.com/starfi11/flow_timer_plugin",
+  "IcoPath": "Images/app.png",
+  "ExecuteFileName": "main.py",
+  "ActionKeyword": "timer"
 }
