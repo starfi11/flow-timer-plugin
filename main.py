@@ -13,7 +13,10 @@ from settings import __plugin_settings__
 
 class TimerPlugin(FlowLauncher):
     def query(self, query):
-        return handle_query(query)
+        results = handle_query(query)
+        # import json
+        # print("PLUGIN OUTPUT:", json.dumps(results, indent=2))
+        return results
 
     def context_menu(self, data):
         return []

@@ -1,8 +1,8 @@
 def __plugin_settings__():
     return {
-        "sandglass_path": {
-            "displayName": "Sandglass EXE Path",
+        "sandtimer_path": {
+            "displayName": "SandTimer EXE Path",
             "description": "设置沙漏计时器的可执行程序路径（.exe）",
-            "defaultValue": "C:\\Program Files\\SandGlassTimer\\SandGlassTimer.exe"
+            "defaultValue": "D:\\chen_education\\project\\Aproject\\sandtimer\\build\\Release\\SandGlassTimer.exe"
         }
     }

@@ -4,14 +4,14 @@ import json
 import subprocess
 import time
 
-SOCKET_NAME = r'\\.\pipe\sandglass_socket'
+SOCKET_NAME = r'\\.\pipe\sandtimer_socket'
 
 def get_sandglass_path():
     config_path = os.path.join(os.path.dirname(__file__), 'Settings.json')
     if os.path.exists(config_path):
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
-            return config.get("sandglass_path", "")
+            return config.get("sandtimer_path", "")
     return ""
 
 def try_launch_exe(path: str) -> bool:
