@@ -1,7 +1,6 @@
 import sys
 import os
 from pathlib import Path
-import win32file
 
 # 添加 plugin 和 lib 路径到 sys.path
 plugin_dir = Path(__file__).parent.absolute()
