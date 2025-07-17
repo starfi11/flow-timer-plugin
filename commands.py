@@ -1,8 +1,6 @@
 from socket_client import send_command
 from utils import parse_input
 import json
-
-
 def handle_query(user_input: str):
     try:
         result = parse_input(user_input)
@@ -28,24 +26,15 @@ def handle_query(user_input: str):
         else:
             subtitle = "Unknown command"
 
-        # Send socket command
-        try:
-            send_command(json.dumps(result))
-        except Exception as e:
-            return [{
-                "Title": "Socket error",
-                "SubTitle": str(e),
-                "IcoPath": "Images/app.png",
-                "JsonRPCAction": {"method": "do_nothing", "parameters": []}
-            }]
-
         return [{
             "Title": f"{cmd} {label}",
             "SubTitle": subtitle,
             "IcoPath": "Images/app.png",
-            "JsonRPCAction": {"method": "do_nothing", "parameters": []}
+            "JsonRPCAction": {
+                "method": "do_command",
+                "parameters": [result]
+            }
         }]
-
     except Exception as e:
         return [{
             "Title": "Internal error",

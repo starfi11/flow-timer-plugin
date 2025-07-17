@@ -3,7 +3,9 @@ import os
 import json
 import subprocess
 import time
-
+import win32file
+import win32pipe
+import pywintypes
 SOCKET_NAME = r'\\.\pipe\sandtimer_socket'
 
 def get_sandglass_path():
@@ -26,24 +28,39 @@ def try_launch_exe(path: str) -> bool:
 
 def send_command(cmd: str):
     try:
-        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        s.connect(SOCKET_NAME)
-        s.sendall(cmd.encode('utf-8'))
-        s.close()
-    except Exception:
+        # 尝试连接管道并发送消息
+        handle = win32file.CreateFile(
+            SOCKET_NAME,
+            win32file.GENERIC_WRITE,
+            0,
+            None,
+            win32file.OPEN_EXISTING,
+            0,
+            None
+        )
+        win32file.WriteFile(handle, cmd.encode('utf-8'))
+        win32file.CloseHandle(handle)
+        return True
+
+    except pywintypes.error as e:
+        # 启动服务进程（例如 Qt 端）再重试
         exe_path = get_sandglass_path()
         launched = try_launch_exe(exe_path)
         if launched:
             try:
-                s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                s.connect(SOCKET_NAME)
-                s.sendall(cmd.encode('utf-8'))
-                s.close()
-                return
-            except Exception:
-                pass
-
-        print(json.dumps([{
-            "Title": "发送失败：沙漏服务不可用",
-            "SubTitle": f"尝试启动服务失败，请检查路径是否正确：{exe_path}"
-        }]))
+                # 重试连接
+                handle = win32file.CreateFile(
+                    SOCKET_NAME,
+                    win32file.GENERIC_WRITE,
+                    0,
+                    None,
+                    win32file.OPEN_EXISTING,
+                    0,
+                    None
+                )
+                win32file.WriteFile(handle, cmd.encode('utf-8'))
+                win32file.CloseHandle(handle)
+                return True
+            except pywintypes.error:
+                pass  # 第二次失败也吞掉
+    return False
