@@ -8,12 +8,8 @@ HOST = "127.0.0.1"
 PORT = 61420
 
 def get_sandtimer_path():
-    config_path = os.path.join(os.path.dirname(__file__), 'Settings.json')
-    if os.path.exists(config_path):
-        with open(config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-            return config.get("sandtimer_path", "")
-    return ""
+    exe_path = os.path.join(os.path.dirname(__file__), "bin", "SandGlassTimer.exe")
+    return exe_path if os.path.exists(exe_path) else ""
 
 def try_launch_exe(path: str) -> bool:
     if not os.path.exists(path):
@@ -31,7 +27,7 @@ def send_command(cmd: str) -> bool:
             with socket.create_connection((HOST, PORT), timeout=1) as s:
                 s.sendall(cmd.encode('utf-8'))
             return True
-        except (ConnectionRefusedError, socket.timeout, OSError):
+        except (ConnectionRefusedError, socket.timeout, OSError) as e:
             return False
 
     if try_send():
@@ -39,6 +35,23 @@ def send_command(cmd: str) -> bool:
 
     exe_path = get_sandtimer_path()
     if try_launch_exe(exe_path):
-        return try_send()
+        if try_send():
+            return True
+        else:
+            # write_log("Second try_send after launch still failed.")
+            pass
+    else:
+        # write_log("Executable launch failed.")
+        pass
 
+    # write_log("send_command returning False")
     return False
+
+from datetime import datetime
+
+# def write_log(msg: str):
+#     desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+#     log_file = os.path.join(desktop_path, "flow_timer_debug_log.txt")
+#     timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
+#     with open(log_file, "a", encoding="utf-8") as f:
+#         f.write(f"{timestamp} {msg}\n")
