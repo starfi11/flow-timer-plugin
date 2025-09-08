@@ -35,12 +35,12 @@ jobs:
             pip install -r requirements.txt -t lib
           }
 
-      - name: Resolve sandtimer tag
+      - name: Resolve sandtimer tag (fixed)
         id: st
         shell: pwsh
         run: |
-          $tag = "${{ inputs.sandtimer_tag }}"
-          if ([string]::IsNullOrEmpty($tag)) { $tag = "${{ github.ref_name }}" }
+          $tag = "v0.1.0"
+          Write-Host "Using fixed sandtimer tag: $tag"
           echo "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Download sandtimer artifact
