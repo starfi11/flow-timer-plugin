@@ -61,7 +61,7 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Test-Path plugin.json)) { throw "plugin.json missing" }
-          if (-not (Test-Path bin/sandtimer.exe)) { throw "sandtimer.exe missing" }
+          if (-not (Test-Path bin/SandGlassTimer.exe)) { throw "SandGlassTimer.exe missing" }
           if (-not (Test-Path lib)) { Write-Host "No lib dir (maybe no deps), OK" }
 
       - name: Create plugin zip
