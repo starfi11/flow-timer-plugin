@@ -64,23 +64,23 @@ jobs:
           if (-not (Test-Path bin/SandGlassTimer.exe)) { throw "SandGlassTimer.exe missing" }
           if (-not (Test-Path lib)) { Write-Host "No lib dir (maybe no deps), OK" }
 
-      - name: Create plugin zip
+      - name: Create plugin zip (preserve folders)
         shell: pwsh
         run: |
           $zip = "flow_timer_plugin-${{ github.ref_name }}.zip"
           if (Test-Path $zip) { Remove-Item $zip }
 
-          # 收集要打包的文件（排除不需要的）
-          $items = Get-ChildItem -Path . -Recurse -File -Force `
-            | Where-Object {
-                $_.FullName -notmatch '\\.git' -and
-                $_.FullName -notmatch '\\.github' -and
-                $_.FullName -notmatch 'tests?' -and
-                $_.Extension -notin @(".ps1", ".yml")
-              } `
-            | Select-Object -ExpandProperty FullName
+          # 使用 tar -a 写 zip，支持 --exclude，并保留目录结构
+          tar -a -c -f $zip `
+            --exclude=.git `
+            --exclude=.github `
+            --exclude=tests `
+            --exclude=tests* `
+            --exclude=*.ps1 `
+            --exclude=*.yml `
+            *
 
-          Compress-Archive -Path $items -DestinationPath $zip -Force
+          Write-Host "Created $zip"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
