@@ -5,7 +5,7 @@
   "Author": "starfi11",
   "Version": "1.0.0",
   "Language": "python",
-  "Website": "https://github.com/starfi11/flow_timer_plugin",
+  "Website": "https://github.com/starfi11/flow-timer-plugin",
   "IcoPath": "Images/app.png",
   "ExecuteFileName": "main.py",
   "ActionKeyword": "timer"

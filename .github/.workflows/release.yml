@@ -1,0 +1,80 @@
+name: Build & Release (Flow Timer Plugin)
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      sandtimer_tag:
+        description: "Override sandtimer tag (default: same as plugin tag)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python deps into ./lib
+        shell: pwsh
+        run: |
+          if (Test-Path lib) { Remove-Item -Recurse -Force lib }
+          python -m pip install --upgrade pip
+          if (Test-Path requirements.txt) {
+            pip install -r requirements.txt -t lib
+          }
+
+      - name: Resolve sandtimer tag
+        id: st
+        shell: pwsh
+        run: |
+          $tag = "${{ inputs.sandtimer_tag }}"
+          if ([string]::IsNullOrEmpty($tag)) { $tag = "${{ github.ref_name }}" }
+          echo "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Download sandtimer artifact
+        uses: robinraju/release-downloader@v1.10
+        with:
+          repository: starfi11/sandtimer
+          tag: ${{ steps.st.outputs.tag }}
+          fileName: "sandtimer-win64-${{ steps.st.outputs.tag }}.zip"
+          out-file-path: "bin"
+
+      - name: Unzip sandtimer
+        shell: pwsh
+        run: |
+          Expand-Archive -Path "bin/sandtimer-win64-${{ steps.st.outputs.tag }}.zip" -DestinationPath "bin" -Force
+          Remove-Item "bin/sandtimer-win64-${{ steps.st.outputs.tag }}.zip"
+
+      - name: Sanity check
+        shell: pwsh
+        run: |
+          if (-not (Test-Path plugin.json)) { throw "plugin.json missing" }
+          if (-not (Test-Path bin/sandtimer.exe)) { throw "sandtimer.exe missing" }
+          if (-not (Test-Path lib)) { Write-Host "No lib dir (maybe no deps), OK" }
+
+      - name: Create plugin zip
+        shell: pwsh
+        run: |
+          $zip = "flow_timer_plugin-${{ github.ref_name }}.zip"
+          if (Test-Path $zip) { Remove-Item $zip }
+          Compress-Archive -Path * -DestinationPath $zip -Force -CompressionLevel Optimal `
+            -Exclude @(".git*", ".github*", "tests*", "*.ps1", "*.yml")
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: flow_timer_plugin-${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
