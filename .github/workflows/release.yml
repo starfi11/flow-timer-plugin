@@ -69,8 +69,18 @@ jobs:
         run: |
           $zip = "flow_timer_plugin-${{ github.ref_name }}.zip"
           if (Test-Path $zip) { Remove-Item $zip }
-          Compress-Archive -Path * -DestinationPath $zip -Force -CompressionLevel Optimal `
-            -Exclude @(".git*", ".github*", "tests*", "*.ps1", "*.yml")
+
+          # 收集要打包的文件（排除不需要的）
+          $items = Get-ChildItem -Path . -Recurse -File -Force `
+            | Where-Object {
+                $_.FullName -notmatch '\\.git' -and
+                $_.FullName -notmatch '\\.github' -and
+                $_.FullName -notmatch 'tests?' -and
+                $_.Extension -notin @(".ps1", ".yml")
+              } `
+            | Select-Object -ExpandProperty FullName
+
+          Compress-Archive -Path $items -DestinationPath $zip -Force
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
